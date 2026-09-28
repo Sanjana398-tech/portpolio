@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════
    MAIN INTERACTIVITY — Sanjana Narayan Naik Portfolio
+   Desktop & Android Mobile Touch Optimized
    ═══════════════════════════════════════════════ */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -7,23 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ─── 1. PRELOADER DISMISSAL ─── */
   const preloader = document.getElementById('preloader');
   if (preloader) {
-    window.addEventListener('load', () => {
+    const dismissPreloader = () => {
+      preloader.classList.add('done');
       setTimeout(() => {
-        preloader.classList.add('done');
-        setTimeout(() => {
-          const pf = document.getElementById('photo-frame');
-          if (pf) pf.classList.add('photo-active');
-        }, 300);
-      }, 1400);
-    });
-    // Fallback if load already fired
-    setTimeout(() => {
-      if (!preloader.classList.contains('done')) {
-        preloader.classList.add('done');
         const pf = document.getElementById('photo-frame');
         if (pf) pf.classList.add('photo-active');
-      }
-    }, 2500);
+      }, 300);
+    };
+
+    window.addEventListener('load', () => setTimeout(dismissPreloader, 1000));
+    setTimeout(dismissPreloader, 2200); // Safety fallback for mobile network speeds
   }
 
   /* ─── 2. SCROLL PROGRESS BAR ─── */
@@ -43,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (sections.length && navLinks.length) {
     window.addEventListener('scroll', () => {
       let current = '';
-      const scrollPos = window.scrollY + 200;
+      const scrollPos = window.scrollY + 180;
 
       sections.forEach(sec => {
         if (scrollPos >= sec.offsetTop) {
@@ -58,20 +52,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
   }
 
-  /* ─── 4. MOBILE HAMBURGER MENU ─── */
+  /* ─── 4. MOBILE HAMBURGER MENU (ANDROID / TOUCH) ─── */
   const hamburger = document.getElementById('hamburger');
   const mobileNav = document.getElementById('mobile-nav');
 
   if (hamburger && mobileNav) {
-    hamburger.addEventListener('click', () => {
+    const toggleMenu = () => {
       hamburger.classList.toggle('open');
       mobileNav.classList.toggle('open');
-    });
+      document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+    };
+
+    hamburger.addEventListener('click', toggleMenu);
 
     mobileNav.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
         hamburger.classList.remove('open');
         mobileNav.classList.remove('open');
+        document.body.style.overflow = '';
       });
     });
   }
@@ -88,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
           revealObs.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.06 });
+    }, { threshold: 0.05 });
 
     revealElements.forEach(el => revealObs.observe(el));
   } else {
@@ -99,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btt = document.getElementById('back-to-top');
   if (btt) {
     window.addEventListener('scroll', () => {
-      btt.classList.toggle('visible', window.scrollY > 500);
+      btt.classList.toggle('visible', window.scrollY > 450);
     }, { passive: true });
 
     btt.addEventListener('click', () => {
@@ -117,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         animateThreatDemo();
         threatObs.unobserve(entries[0].target);
       }
-    }, { threshold: 0.3 });
+    }, { threshold: 0.25 });
 
     threatObs.observe(threatDemo);
   }
@@ -144,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 20);
   }
 
-  /* ─── 8. TRINETRA RADAR EYE CANVAS ─── */
+  /* ─── 8. TRINETRA RADAR EYE CANVAS (DESKTOP & MOBILE RESIZABLE) ─── */
   (function initRadarCanvas() {
     const canvas = document.getElementById('trinetra-canvas');
     if (!canvas) return;
@@ -166,10 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resize);
 
     const particles = [];
-    for (let i = 0; i < 35; i++) {
+    const count = window.innerWidth < 640 ? 20 : 35;
+    for (let i = 0; i < count; i++) {
       particles.push({
         angle: Math.random() * Math.PI * 2,
-        dist: 40 + Math.random() * 100,
+        dist: 35 + Math.random() * 95,
         speed: (Math.random() - 0.5) * 0.008,
         size: Math.random() * 1.5 + 0.4,
         pulse: Math.random() * Math.PI * 2
@@ -181,7 +180,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function draw() {
       time += 0.016;
       ctx.clearRect(0, 0, W, H);
-      const baseR = Math.min(W, H) / 2 - 12;
+      const baseR = Math.min(W, H) / 2 - 10;
+
+      if (baseR <= 0) {
+        requestAnimationFrame(draw);
+        return;
+      }
 
       // Outer static ring
       ctx.beginPath();
@@ -196,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.rotate(time * 0.15);
       ctx.setLineDash([6, 14]);
       ctx.beginPath();
-      ctx.arc(0, 0, baseR - 12, 0, Math.PI * 2);
+      ctx.arc(0, 0, Math.max(5, baseR - 12), 0, Math.PI * 2);
       ctx.strokeStyle = 'rgba(56, 189, 248, 0.18)';
       ctx.lineWidth = 1;
       ctx.stroke();
@@ -208,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.rotate(-time * 0.1);
       ctx.setLineDash([3, 18]);
       ctx.beginPath();
-      ctx.arc(0, 0, baseR - 28, 0, Math.PI * 2);
+      ctx.arc(0, 0, Math.max(5, baseR - 28), 0, Math.PI * 2);
       ctx.strokeStyle = 'rgba(167, 139, 250, 0.15)';
       ctx.lineWidth = 1;
       ctx.stroke();
@@ -222,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
       grad.addColorStop(0.08, 'rgba(56, 189, 248, 0)');
       grad.addColorStop(1, 'rgba(56, 189, 248, 0)');
       ctx.beginPath();
-      ctx.arc(0, 0, baseR - 12, 0, Math.PI * 2);
+      ctx.arc(0, 0, Math.max(5, baseR - 12), 0, Math.PI * 2);
       ctx.fillStyle = grad;
       ctx.fill();
       ctx.restore();
@@ -238,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
       particles.forEach(p => {
         p.angle += p.speed;
         p.pulse += 0.03;
-        const d = p.dist + Math.sin(p.pulse) * 6;
+        const d = (p.dist / 140) * baseR + Math.sin(p.pulse) * 4;
         const px = cx + Math.cos(p.angle) * d;
         const py = cy + Math.sin(p.angle) * d;
         
@@ -253,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
     draw();
   })();
 
-  /* ─── 9. PHOTO FRAME TILT & CANVAS ─── */
+  /* ─── 9. PHOTO FRAME TILT & CANVAS (MOUSE & TOUCH FRIENDLY) ─── */
   (function initPhotoFrameCanvas() {
     const canvas = document.getElementById('pf-particles');
     if (!canvas) return;
@@ -266,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cx = W / 2, cy = H / 2;
 
     const dots = [];
-    for (let i = 0; i < 24; i++) {
+    for (let i = 0; i < 20; i++) {
       dots.push({
         a: Math.random() * Math.PI * 2,
         r: 85 + Math.random() * 45,
@@ -294,10 +298,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     draw();
 
-    // 3D tilt effect on mouse hover
+    // 3D tilt effect for Mouse Hover (Desktop mode only to preserve mobile scroll)
     const frame = document.getElementById('photo-frame');
     const wrap = frame?.querySelector('.pf-wrap');
-    if (frame && wrap) {
+    if (frame && wrap && window.matchMedia('(hover: hover)').matches) {
       frame.addEventListener('mousemove', (e) => {
         const r = frame.getBoundingClientRect();
         const x = (e.clientX - r.left) / r.width - 0.5;
@@ -310,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })();
 
-  /* ─── 10. COMMAND PALETTE ─── */
+  /* ─── 10. COMMAND PALETTE (DESKTOP KEYBOARD & ANDROID TOUCH TARGETS) ─── */
   const cmdOverlay = document.getElementById('cmd-overlay');
   const cmdInput = document.getElementById('cmd-input');
   const cmdResults = document.getElementById('cmd-results');
